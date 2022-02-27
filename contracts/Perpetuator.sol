@@ -11,11 +11,12 @@ contract Perpetuator is Ownable {
 
     struct Post {
         string message;
-        address poster;
+        address author;
     }
 
     Post[] public posts;
     uint public price = 0.01 ether;
+    uint public charLimit = 288;
 
     constructor() {
     }
@@ -27,14 +28,22 @@ contract Perpetuator is Ownable {
         count = posts.length;
     }
 
+    /**
+     * @notice post a message to the blockchain
+     */
     function post(string memory _message) public payable {
         require(msg.value >= price, "PERP: insufficient amount");
+        require(bytes(_message).length <= charLimit, "PERP: character limit exceeded");
         posts.push(Post(_message, msg.sender));
         address payable owner = payable(owner());
         owner.transfer(msg.value);
     }
     
-    function changePrice(uint _price) external onlyOwner {
+    function setLimit(uint _limit) external onlyOwner {
+        charLimit = _limit;
+    }
+
+    function setPrice(uint _price) external onlyOwner {
         price = _price;
     }
 
