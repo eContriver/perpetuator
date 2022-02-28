@@ -13,7 +13,7 @@ function App() {
   const [userAccount, setUserAccount] = useState()
   const [amount, setAmount] = useState()
   const [posts, setPosts] = useState([])
-  const [isLoading, setIsLoading] = useState(true);
+  // const [isLoading, setIsLoading] = useState(true);
 
   useEffect(() => {
     const init = async() => {
@@ -24,11 +24,15 @@ function App() {
       const newPosts = []
       const count = await contract.getPostCount()
       console.log('count.i: ', count.toString())
-      const pid = count.sub(1)
-      const post = await contract.posts(pid)
-      console.log('msg.i: ', post.message)
-      var fePost = {id: pid, message: post.message, author: post.author}
-      newPosts.push(fePost)
+      let index = count.sub(1)
+      const stopAt = count - 3
+      while (index >= stopAt) {
+        const post = await contract.posts(index)
+        console.log('msg.i: ', post.message)
+        var fePost = { id: index, message: post.message, author: post.author }
+        newPosts.push(fePost)
+        index--;
+      }
       setPosts(newPosts)
     }
     init()
@@ -117,15 +121,11 @@ function App() {
       <h1 className='title'>Perpetuator</h1>
       <header className="App-header">
         <button onClick={fetchMessage}>Fetch Message</button>
-        <input onChange={e => setMessageValue(e.target.value)} placeholder="Post message" />
+        <input onChange={e => setMessageValue(e.target.value)} placeholder="Post a message?" />
         <button onClick={setMessage}>Post Message</button>
-        {/* {posts.forEach(function (item,index) {
-          <p key={item}>{index}:{item}</p>
-        })} */}
-        {posts.map((item,key) => (
+        {posts.map((item,index) => (
           <div>
-            {console.log("p:", item)}
-            <p key={item}>{item.id.toString()}:{item.message}</p>
+            <p key={item.id.toString()}>{item.id.toString()}:{item.message}</p>
             <pre>{item.author}</pre>
           </div>
         ))}
